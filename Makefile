@@ -25,13 +25,6 @@ start: do-init do-start do-finish
 do-start:
 	@echo "$(STEP) Starting up containers... $(STEP)"
 	docker-compose -f docker-compose.yml up -d --remove-orphans
-	docker exec $(DOCKER_PHP_CONTAINER_NAME) service cron start
-	docker exec $(DOCKER_USER) $(DOCKER_TOOLBOX_CONTAINER_NAME) ./.docker/up.sh
-
-setup: do-init do-build do-start do-setup do-build-database do-front do-finish
-do-setup:
-	@echo "$(STEP) Setup project... $(STEP)"
-	docker exec $(DOCKER_USER) $(DOCKER_TOOLBOX_CONTAINER_NAME) ./.docker/install.sh
 
 stop: do-init do-stop do-finish
 do-stop:

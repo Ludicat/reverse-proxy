@@ -24,7 +24,5 @@ services:
 
 networks:
     reverse_proxy:
+        # Expose to local network
         external: true
-    internal:
-        driver: bridge
-        external: false
