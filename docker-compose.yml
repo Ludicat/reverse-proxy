@@ -2,7 +2,7 @@ version: '2'
 
 services:
     traefik:
-        container_name: dnx_traefik
+        container_name: traefik
         image: traefik:latest
         restart: "no"
         command: -c /dev/null --api --docker --configFile=/etc/traefik/traefik.toml --debug
@@ -18,7 +18,7 @@ services:
             - "traefik.port=8080"
             - 'traefik.enable=true'
             - "traefik.docker.network=reverse_proxy"
-            - "traefik.frontend.rule=Host:traefik.${DOCKER_DNS_DOMAIN}"
+            - "traefik.frontend.rule=Host:traefik.${DOCKER_TLD}"
             - "traefik.frontend.passHostHeader=true"
             - "traefik.backend.loadbalancer.sticky=true"
 
