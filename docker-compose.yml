@@ -4,7 +4,7 @@ services:
     traefik:
         container_name: traefik
         image: traefik:latest
-        restart: "no"
+        restart: ${DOCKER_RESTART}
         command: -c /dev/null --api --docker --configFile=/etc/traefik/traefik.toml --debug
         networks:
             - reverse_proxy
