@@ -1,4 +1,5 @@
-ENV_VARS= DOCKER_DNS_DOMAIN=$(DOCKER_DNS_DOMAIN)
+include .env
+export
 
 STEP = "\\n\\r**************************************************\\n"
 
@@ -30,6 +31,8 @@ stop: do-init do-stop do-finish
 do-stop:
 	@echo "$(STEP) Stopping containers... $(STEP)"
 	docker-compose stop
+
+restart: do-init do-stop do-start do-finish
 
 down: do-init do-down do-finish
 do-down:

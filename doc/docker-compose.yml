@@ -1,0 +1,109 @@
+# ====================================================
+# We asume this file is in folder /.docker from your
+# project root.
+# It's not an optimal structure but enough as exemple.
+#
+# Please note that none of the container expose ports.
+# We use labels for that purpose.
+# ====================================================
+version: '2.2'
+
+services:
+    nginx:
+        container_name: "${DOCKER_DNS_DOMAIN}_nginx"
+        # Nginx dockerfile and config files are in a folder
+        build: "./nginx"
+        restart: "always"
+        volumes:
+            - "./../:/var/www/html:delegated"
+        networks:
+            - "myproject"
+            - "reverse_proxy"
+        environment:
+            TZ: 'Europe/Paris'
+            PHP_CONTAINER_NAME: ${PHP_CONTAINER_NAME}
+            DOCKER_DNS_DOMAIN: ${DOCKER_DNS_DOMAIN}
+        labels:
+            - "traefik.port=80"
+            - "traefik.docker.network=reverse_proxy"
+            - "traefik.frontend.passHostHeader=true"
+            - "traefik.backend.loadbalancer.sticky=true"
+            # Note that I used regexp to have two sumbomains
+            - "traefik.frontend.rule=HostRegexp:{subdomain:www}.${DOCKER_DNS_DOMAIN}"
+            
+    php-fpm:
+        container_name: "${DOCKER_DNS_DOMAIN}_php-fpm"
+        build: 
+            # You certainly have a dockerfile and other configuration files in this folder
+            context: ./php-fpm
+        restart: "no"
+        healthcheck:
+            test: ["CMD", "phpfpm", "cgi-fcgi", "-bind", "-connect", "127.0.0.1:9000"]
+            interval: "1s"
+            timeout: "3s"
+            retries: 10
+        volumes:
+            - "./../:/var/www/html:delegated"
+        networks:
+            - "myproject"
+        environment:
+            TZ: 'Europe/Paris'
+            ENVIRONMENT: "prod"
+            XDEBUG_ENABLE: 0
+        labels:
+            - "traefik.enable=false"
+            
+    mysql:
+        container_name: "${DOCKER_DNS_DOMAIN}_mysql"
+        image: "mysql:5.7"
+        restart: "no"
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+            interval: "1s"
+            timeout: "20s"
+            retries: 10
+        networks:
+            - "myproject"
+        environment:
+            TZ: 'Europe/Paris'
+            MYSQL_ROOT_PASSWORD: "root"
+            MYSQL_DATABASE: "myproject"
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASS}
+        volumes:
+            # You could also use a folder in .docker, just don't forget to add path to .gitignore
+            - myproject_mysql55:/var/lib/mysql/
+            # Put your initialisation config file
+            - ./mysql/init/:/docker-entrypoint-initdb.d/:ro
+        labels:
+            - "traefik.enable=false"
+
+    pma:
+        container_name: "${DOCKER_DNS_DOMAIN}_pma"
+        image: "phpmyadmin/phpmyadmin"
+        restart: "always"
+        networks:
+            - "myproject"
+            - "reverse_proxy"
+        environment:
+            TZ: 'Europe/Paris'
+            PMA_HOST: "mysql"
+            PMA_USER: ${MYSQL_USER}
+            PMA_PASSWORD: ${MYSQL_USER}
+        labels:
+            - "traefik.port=80"
+            - "traefik.docker.network=reverse_proxy"
+            - "traefik.frontend.passHostHeader=true"
+            - "traefik.backend.loadbalancer.sticky=true"
+            - "traefik.frontend.rule=Host:pma.${DOCKER_DNS_DOMAIN}"
+
+volumes:
+    myproject_mysql57:
+        driver: local
+
+networks:
+    # Network name is here to avoid conflicts if you have multiple projects at the same time
+    myproject:
+        driver: bridge
+    reverse_proxy:
+        external: true
