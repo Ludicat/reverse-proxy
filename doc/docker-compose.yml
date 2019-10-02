@@ -13,7 +13,7 @@ services:
         container_name: "${DOCKER_DNS_DOMAIN}_nginx"
         # Nginx dockerfile and config files are in a folder
         build: "./nginx"
-        restart: "always"
+        restart: "no"
         volumes:
             - "./../:/var/www/html:delegated"
         networks:
@@ -29,7 +29,7 @@ services:
             - "traefik.frontend.passHostHeader=true"
             - "traefik.backend.loadbalancer.sticky=true"
             # Note that I used regexp to have two sumbomains
-            - "traefik.frontend.rule=HostRegexp:{subdomain:www}.${DOCKER_DNS_DOMAIN}"
+            - "traefik.frontend.rule=HostRegexp:{subdomain:www|admin}.${DOCKER_DNS_DOMAIN}"
             
     php-fpm:
         container_name: "${DOCKER_DNS_DOMAIN}_php-fpm"
@@ -80,8 +80,8 @@ services:
 
     pma:
         container_name: "${DOCKER_DNS_DOMAIN}_pma"
-        image: "phpmyadmin/phpmyadmin"
-        restart: "always"
+        image: "phpmyadmin/phpmyadmin:4.8"
+        restart: "no"
         networks:
             - "myproject"
             - "reverse_proxy"

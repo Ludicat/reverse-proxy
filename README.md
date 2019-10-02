@@ -18,14 +18,18 @@ Open it with any text editor and update the file with your parameters.
     DOCKER_RESTART=always
     ###< docker-compose ###
 
-Copy `traefik.toml.dist` to `traefik.toml`. To update it, please refers to [Traefik officiel documentation](https://docs.traefik.io/v1.0/toml/)
+Copy `traefik.toml.dist` to `traefik/traefik.toml`. To update it, please refers to [Traefik officiel documentation](https://docs.traefik.io/v1.0/toml/)
+
+Create self signed certificates for local usage
+-----------------------------------------------
+
+Copy `server.cnf.dist` to `server.cnf` and update relevant fields (not very important).
+
+You can just run `generateCert.sh` that will ask you for the same password 4 times.
+Or you can do it the way you want, the important thing is to have  
 
 Build and run docker
 --------------------
-
-Before first run and after config update you should run 
-
-    make build
 
 Start this container to benefit of all other projects been mounted through traefik reverse proxy.
 
@@ -102,10 +106,14 @@ that don't have to, like databases.
 In you docker compose files, just add labels like described in [Traefik container documentation](https://docs.traefik.io/v1.5/configuration/backends/docker/#on-containers)
 then start them.
 
-Check the sample file for basic php container setup [here](doc/docker-compose.yml).
+Traefik rely on network `reverse_proxy`, put everything that should be exposed into this network.
+
+Traefik will serve http traffic over https, so don't expose nginx to port 443, keep ip on port 80
+and it should work fine.
+
+Check the sample file for basic php container setup [here](doc/docker-compose.yml) for flag usage.
 
 Last word
 =========
 
 - It's NOT a production ready container, it have never been tested in such environment. Purpose is to have an easy setup for dev env.
-- I had difficulties making https works (only by accessing container by direct ip:port). https label didn't worked for me, certainly a traefik.toml issue. If any of you have an idea or method to resolve, feel free to submit a merge request (even to update this documentation).

@@ -1,26 +1,25 @@
-version: '2'
+version: '3'
 
 services:
     traefik:
         container_name: traefik
-        image: traefik:latest
+        image: traefik:1.7
         restart: ${DOCKER_RESTART}
         command: -c /dev/null --api --docker --configFile=/etc/traefik/traefik.toml --debug
         networks:
             - reverse_proxy
         ports:
-            - "80:80"
+            - 80:80
+            - 443:443
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
-            - ./traefik.toml:/etc/traefik/traefik.toml
+            - ./traefik:/etc/traefik
+            - ./certs/:/certs/
         labels:
-            - "traefik.frontend.priority=2"
-            - "traefik.backend=traefik"
             - "traefik.port=8080"
-            - 'traefik.enable=true'
-            - "traefik.docker.network=reverse_proxy"
+            - "traefik.enable=true"
             - "traefik.frontend.rule=Host:traefik.${DOCKER_TLD}"
-            - "traefik.frontend.passHostHeader=true"
+            - "traefik.backend=traefik"
             - "traefik.backend.loadbalancer.sticky=true"
 
 networks:
