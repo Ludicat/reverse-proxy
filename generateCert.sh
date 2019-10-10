@@ -11,3 +11,7 @@ openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 mv server.key certs/
 mv server.cer certs/
 mv server.crt certs/
+
+# Use on Ubuntu to add new certificate to trust list
+#sudo cp certs/server.crt /usr/local/share/ca-certificates/
+#sudo update-ca-certificates
