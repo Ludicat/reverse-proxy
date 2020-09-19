@@ -6,10 +6,10 @@ rm server.key
 mv server.key.insecure server.key
 openssl req -new -key server.key -out server.csr -config server.cnf
 
-openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt
 
 mv server.key certs/
-mv server.cer certs/
+mv server.csr certs/
 mv server.crt certs/
 
 # Use on Ubuntu to add new certificate to trust list
